@@ -15,7 +15,7 @@ class UserController {
       return res.status(400).send({ error: 'Missing password' });
     }
 
-    const existingUser = await dbClient.db.collection('users').findOne({ email });
+    const existingUser = await dbClient.usersCollection.findOne({ email });
     if (existingUser) {
       return res.status(400).send({ error: 'Already exist' });
     }
@@ -27,7 +27,13 @@ class UserController {
       password: hashedPassword,
     };
 
-    const result = await dbClient.db.collection('users').insertOne(newUser);
+    let result;
+    try {
+      result = await dbClient.usersCollection.insertOne(newUser);
+    } catch (err) {
+      return response.status(500).send({ error: 'Error creating user.' });
+    }
+
 
     const { insertedId } = result;
     return res.status(201).send({ email, id: insertedId });
