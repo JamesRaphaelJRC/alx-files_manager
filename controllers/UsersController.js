@@ -1,9 +1,14 @@
 // User controller module
 import dbClient from '../utils/db';
+import Queue from 'bull';
 
 const sha1 = require('sha1');
+const userQueue = new Queue('userQueue');
 
 class UserController {
+  /**
+   * creates a user using email and password
+   */
   static async postNew(req, res) {
     const { email, password } = req.body;
 
@@ -31,6 +36,7 @@ class UserController {
     try {
       result = await dbClient.usersCollection.insertOne(newUser);
     } catch (err) {
+      await userQueue.add({});
       return response.status(500).send({ error: 'Error creating user.' });
     }
 
