@@ -12,7 +12,7 @@ class DBClient {
 
     this.client = new MongoClient(url, { useUnifiedTopology: true });
 
-    this.client.connect()
+    this.client.connect();
   }
 
   isAlive() {
