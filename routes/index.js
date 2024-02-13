@@ -1,6 +1,6 @@
 import express from 'express';
 import AppController from '../controllers/AppController';
-import UserController from '../controllers/UserController';
+import UsersController from '../controllers/UsersController';
 
 function controllerRouting(app) {
   const router = express.Router();
@@ -18,7 +18,7 @@ function controllerRouting(app) {
 
   // User route
   router.post('/users', (req, res) => {
-    UserController.postNew(req, res);
+    UsersController.postNew(req, res);
   })
 }
 
