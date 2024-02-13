@@ -1,11 +1,20 @@
 /* Routes module */
+import express from 'express';
+import AppController from '../controllers/AppController';
 
-const express = require('express');
-const AppController = require('../controllers/AppController');
+function controllerRouting(app) {
+  const router = express.Router();
+  app.use('/', router);
 
-const router = express.Router();
+  // Route to get redis server status
+  router.get('/status', (req, res) => {
+    AppController.getStatus(req, res);
+  });
 
-router.get('/status', AppController.getStatus);
-router.get('/stats', AppController.getStatus);
+  // Returns number of users and files in DB
+  router.get('/stats', (req, res) => {
+    AppController.getStatus(req, res);
+  });
+}
 
-module.exports = router;
+export default controllerRouting;
