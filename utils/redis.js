@@ -12,6 +12,8 @@ class RedisClient {
   }
 
   isAlive() {
+    console.log('Client connected:', this.client.connected);
+    console.log('Connection options:', this.client.connection_options);
     return this.client.connected;
   }
 
