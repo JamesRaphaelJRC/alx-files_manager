@@ -1,51 +1,45 @@
 // User controller module
-// import { ObjectId } from 'mongodb';
-import sha1 from 'sha1';
-import Queue from 'bull';
 import dbClient from '../utils/db';
-// import userUtils from '../utils/user';
 
-const userQueue = new Queue('userQueue');
+const sha1 = require('sha1');
 
-class UserController {
+class UsersController {
   /**
    * creates a user using email and password
    */
-  static async postNew(request, response) {
-    const { email, password } = request.body;
+  static async postNew(req, res) {
+    const { email, password } = req.body;
 
-    if (!email) return response.status(400).send({ error: 'Missing email' });
+    if (!email) {
+      return res.status(400).send({ error: 'Missing email' });
+    }
 
-    if (!password) { return response.status(400).send({ error: 'Missing password' }); }
+    if (!password) {
+      return res.status(400).send({ error: 'Missing password' });
+    }
 
     const existingUser = await dbClient.usersCollection.findOne({ email });
-
-    if (existingUser) { return response.status(400).send({ error: 'Already exist' }); }
+    if (existingUser) {
+      return res.status(400).send({ error: 'Already exist' });
+    }
 
     const hashedPassword = sha1(password);
 
-    let result;
-    try {
-      result = await dbClient.usersCollection.insertOne({
-        email,
-        password: hashedPassword,
-      });
-    } catch (err) {
-      await userQueue.add({});
-      return response.status(500).send({ error: 'Error creating user.' });
-    }
-
-    const user = {
-      id: result.insertedId,
+    const newUser = {
       email,
+      password: hashedPassword,
     };
 
-    await userQueue.add({
-      userId: result.insertedId.toString(),
-    });
+    let result;
+    try {
+      result = await dbClient.usersCollection.insertOne(newUser);
+    } catch (err) {
+      return res.status(500).send({ error: 'Error creating user.' });
+    }
 
-    return response.status(201).send(user);
+    const { insertedId } = result;
+    return res.status(201).send({ email, id: insertedId });
   }
 }
 
-module.exports = UserController;
+module.exports = UsersController;

@@ -16,10 +16,10 @@ function controllerRouting(app) {
     AppController.getStats(req, res);
   });
 
-  // User route
+  // Handles new user creation
   router.post('/users', (req, res) => {
     UsersController.postNew(req, res);
-  })
+  });
 }
 
 export default controllerRouting;
