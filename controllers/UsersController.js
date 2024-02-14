@@ -1,7 +1,11 @@
 // User controller module
+import { ObjectId } from 'mongodb';
+import sha1 from 'sha1';
+import Queue from 'bull';
 import dbClient from '../utils/db';
+import userUtils from '../utils/user';
 
-const sha1 = require('sha1');
+const userQueue = new Queue('userQueue');
 
 class UsersController {
   /**
@@ -40,6 +44,22 @@ class UsersController {
 
     const { insertedId } = result;
     return res.status(201).send({ email, id: insertedId });
+  }
+  // Retrieves the user base on the token used
+  static async getMe(request, response) {
+    const { userId } = await userUtils.getUserIdAndKey(request);
+
+    const user = await userUtils.getUser({
+      _id: ObjectId(userId),
+    });
+
+    if (!user) return response.status(401).send({ error: 'Unauthorized' });
+
+    const processedUser = { id: user._id, ...user };
+    delete processedUser._id;
+    delete processedUser.password;
+
+    return response.status(200).send(processedUser);
   }
 }
 
